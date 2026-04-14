@@ -1,0 +1,132 @@
+<!-- Frontend: index.html -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>單字收藏網站</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .hidden { display:none; }
+    .maintenance { color: red; font-size: 20px; }
+  </style>
+</head>
+<body>
+  <h1>英文單字收藏</h1>
+
+  <!-- 搜尋區 -->
+  <input type="text" id="searchInput" placeholder="輸入中文，例如: 蘋果">
+  <button onclick="searchWord()">搜尋</button>
+
+  <div id="result"></div>
+  <div id="maintenanceMsg" class="maintenance hidden">系統維修中...</div>
+
+  <hr>
+
+  <!-- 登入區 -->
+  <h3>後台登入</h3>
+  <input id="username" placeholder="帳號">
+  <input id="password" type="password" placeholder="密碼">
+  <button onclick="login()">登入</button>
+
+  <div id="adminPanel" class="hidden">
+    <h3>管理後台</h3>
+    <button onclick="toggleMaintenance()">切換維修模式</button>
+
+    <div id="wordManage" class="hidden">
+      <h4>新增/刪除單字 (管理員專用)</h4>
+      <input id="newWord" placeholder="英文">
+      <input id="newMeaning" placeholder="中文">
+      <input id="newPos" placeholder="詞性">
+      <button onclick="addWord()">新增</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <p>客服信箱: <a href="mailto:115.pths@gmail.com">115.pths@gmail.com</a></p>
+
+<script>
+// 模擬資料庫 (可擴展到50萬筆 -> JSON or API)
+let words = [
+  { zh: "蘋果", en: "apple", pos: "名詞", syn: "fruit", ant: "" }
+];
+
+let maintenance = false;
+let role = null;
+
+function searchWord() {
+  if (maintenance) {
+    document.getElementById("maintenanceMsg").classList.remove("hidden");
+    return;
+  }
+
+  let input = document.getElementById("searchInput").value;
+  let found = words.find(w => w.zh === input);
+
+  if (found) {
+    document.getElementById("result").innerHTML = `
+      英文: ${found.en}<br>
+      詞性: ${found.pos}<br>
+      同義字: ${found.syn}<br>
+      反義字: ${found.ant}
+    `;
+  } else {
+    document.getElementById("result").innerText = "找不到";
+  }
+}
+
+function login() {
+  let u = document.getElementById("username").value;
+  let p = document.getElementById("password").value;
+
+  if (u === "admin" && p === "1234") {
+    role = "admin";
+  } else if (u === "maint" && p === "5678") {
+    role = "maint";
+  } else {
+    alert("登入失敗");
+    return;
+  }
+
+  document.getElementById("adminPanel").classList.remove("hidden");
+
+  if (role === "admin") {
+    document.getElementById("wordManage").classList.remove("hidden");
+  }
+}
+
+function toggleMaintenance() {
+  maintenance = !maintenance;
+  alert("維修模式: " + maintenance);
+}
+
+function addWord() {
+  if (role !== "admin") return;
+
+  words.push({
+    zh: document.getElementById("newMeaning").value,
+    en: document.getElementById("newWord").value,
+    pos: document.getElementById("newPos").value,
+    syn: "",
+    ant: ""
+  });
+
+  alert("新增成功");
+}
+</script>
+</body>
+</html>
+
+<!-- GitHub 部署說明:
+1. 建立 GitHub repository
+2. 上傳 index.html
+3. 開啟 Settings > Pages
+4. 選擇 main branch
+5. 即可生成網站
+-->
+
+<!-- 後續建議:
+- 使用 Firebase / Supabase 儲存50萬筆資料
+- 使用 API (dictionary API) 查詢單字
+- 加入 JWT 登入系統
+-->
